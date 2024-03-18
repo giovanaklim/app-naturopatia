@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import {ref, onMounted} from "vue";
+import {ref,  onBeforeMount} from "vue";
 import {usePlantStore} from "stores/plant";
 import {useRouter} from "vue-router";
 
-const router = useRouter();
+const indexPlant = ref(0)
+const router = useRouter()
 const store = usePlantStore()
+
 const plantsCollection = ref<any>([])
 const selectedPlant = ref({
   name: '',
@@ -14,20 +16,25 @@ const selectedPlant = ref({
   medicines: ref<{ name: string }[]>([]),
   file: {} as File,
 })
-const favorited = ref(false)
 
-onMounted( async () => {
+onBeforeMount( async () => {
   plantsCollection.value = await store.getPlants()
-  console.log(plantsCollection.value)
   selectedPlant.value = plantsCollection.value[0]
 })
 const selectPlant = (index: any) => {
+  indexPlant.value = index
   selectedPlant.value = plantsCollection.value[index]
 }
 
-const favorite = () => {
-  store.plantLike(selectedPlant.value.id)
-}
+const favorite = ( async (id: any) => {
+  await store.plantLike(id)
+  reloadPlants(indexPlant.value)
+})
+
+const reloadPlants = ( async (index: any) => {
+  plantsCollection.value = await store.getPlants()
+  selectedPlant.value = plantsCollection.value[index]
+})
 
 </script>
 
@@ -57,6 +64,7 @@ const favorite = () => {
             <div v-for="(plant, index) in plantsCollection" :key="index" >
               <q-card class="tw-rounded-lg q-ma-md cursor-pointer" @click="selectPlant(index)">
                 <q-badge
+                  v-if="plant.plant_like.like"
                   class="bg-transparent q-mt-xl"
                   floating
                   style="position: absolute; bottom: 0; right: 0"
@@ -117,14 +125,14 @@ const favorite = () => {
               </div>
               <div class="col-3">
                 <div class="row full-height full-width justify-center">
-<!--                  <q-icon-->
-<!--                    class="q-mt-lg  cursor-pointer"-->
-<!--                    :class="selectedPlant.plant_like.like ? '' : 'q-ml-xl' "-->
-<!--                    :name="selectedPlant.plant_like.like ? 'favorite' : 'favorite_outlined'"-->
-<!--                    color="purple"-->
-<!--                    size="xl"-->
-<!--                    @click="favorite"-->
-<!--                  />-->
+                  <q-icon
+                    :class="selectedPlant.plant_like.like ? '' : 'q-ml-xl' "
+                    :name="selectedPlant.plant_like.like ? 'favorite' : 'favorite_outlined'"
+                    class="q-mt-lg  cursor-pointer"
+                    color="purple"
+                    size="xl"
+                    @click="favorite(selectedPlant.id)"
+                  />
                 </div>
               </div>
             </div>
