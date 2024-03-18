@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import {SearchPlant} from "src/types/search-plant";
 import {useRouter} from "vue-router";
 import {usePlantStore} from "stores/plant";
 
 const store = usePlantStore()
-const router = useRouter();
-const currentStep = ref(1)
-const selected = ref<number[]>([])
-
-const previousStep1 =  ref<number[]>([])
-const previousStep2 =  ref<number[]>([])
-const previousStep3 =  ref<number[]>([])
-
+const router = useRouter()
 const formSearchPlant = ref<SearchPlant>({
   symptoms: [],
   illnesses: [],
   medicines:[]
 })
+
+const currentStep = ref(1)
+const previousStep1 =  ref<number[]>([])
+const previousStep2 =  ref<number[]>([])
+const previousStep3 =  ref<number[]>([])
+const selected = ref<number[]>([])
 const selectedSymptoms = ref<{ name: string }[]>([])
 const selectedIllnesses = ref<{ name: string }[]>([])
 const selectedMedicines = ref<{ name: string }[]>([])
+
 const symptoms = ref([
   {name: 'Climatério/menopausa'},
   {name: 'Enxaqueca'},
@@ -115,6 +115,55 @@ onMounted( async () => {
   sortedIllnesses()
   sortedMedicines()
 })
+
+const  sortedSymptoms = () => {
+  symptoms.value = symptoms.value.slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+const  sortedIllnesses = () => {
+  illnesses.value = illnesses.value.slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+const  sortedMedicines = () => {
+  medicines.value = medicines.value.slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+
+const select = (index: any) => {
+  if(!selected.value.includes(index)){
+    selected.value.push(index)
+  }
+  else {
+    const selectedIndex = selected.value.indexOf(index);
+    selected.value.splice(selectedIndex, 1)
+  }
+}
+const nextStep = (values: any) => {
+  onSubmit(values)
+  switch (currentStep.value){
+    case 1:
+      previousStep1.value = selected.value
+      currentStep.value = currentStep.value + 1
+      selected.value = previousStep2.value
+      break
+    case 2 :
+      previousStep2.value = selected.value
+      currentStep.value = currentStep.value + 1
+      selected.value = previousStep3.value
+      break
+    case 3 :
+      previousStep3.value = selected.value
+  }
+}
+const stepBack = () => {
+  switch (currentStep.value){
+    case 2 :
+      selected.value =  previousStep1.value
+      break
+    case 3 :
+      selected.value =  previousStep2.value
+      break
+  }
+  currentStep.value = currentStep.value - 1
+}
+
 const onSubmit = (values: any) => {
   switch (currentStep.value) {
     case 1:
@@ -139,69 +188,21 @@ const submit = () => {
   formSearchPlant.value.symptoms = selectedSymptoms.value
   formSearchPlant.value.illnesses = selectedIllnesses.value
   formSearchPlant.value.medicines = selectedMedicines.value
+
   previousStep3.value = []
   previousStep2.value = []
   previousStep1.value = []
+
   usePlantStore().searchPlants(formSearchPlant.value)
   router.push('/search-results')
-}
-const select = (index: any) => {
-  if(!selected.value.includes(index)){
-    selected.value.push(index)
-  }
-  else {
-    const selectedIndex = selected.value.indexOf(index);
-    selected.value.splice(selectedIndex, 1)
-  }
-}
-
-const  sortedSymptoms = () => {
-  symptoms.value = symptoms.value.slice().sort((a, b) => a.name.localeCompare(b.name));
-}
-
-const  sortedIllnesses = () => {
-  illnesses.value = illnesses.value.slice().sort((a, b) => a.name.localeCompare(b.name));
-}
-
-const  sortedMedicines = () => {
-  medicines.value = medicines.value.slice().sort((a, b) => a.name.localeCompare(b.name));
-}
-const nextStep = (values: any) => {
-  onSubmit(values)
-  switch (currentStep.value){
-    case 1:
-      previousStep1.value = selected.value
-      currentStep.value = currentStep.value + 1
-      selected.value = previousStep2.value
-      break
-    case 2 :
-      previousStep2.value = selected.value
-      currentStep.value = currentStep.value + 1
-      selected.value = previousStep3.value
-      break
-    case 3 :
-      previousStep3.value = selected.value
-  }
-}
-
-const stepBack = () => {
-  switch (currentStep.value){
-    case 2 :
-      selected.value =  previousStep1.value
-      break
-    case 3 :
-      selected.value =  previousStep2.value
-      break
-  }
-  currentStep.value = currentStep.value - 1
 }
 
 const emits = defineEmits<{
   (e: "close", event: boolean): void;
 }>();
 const close = () => {
-    emits("close", false)
-  }
+  emits("close", false)
+}
 
 </script>
 

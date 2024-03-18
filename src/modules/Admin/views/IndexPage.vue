@@ -2,11 +2,8 @@
 import {onBeforeMount, ref, watch} from "vue";
 import newPlant from '../components/new-plant/IndexPage.vue'
 import {useUserStore} from "stores/user";
-const message = ref('Alterar Senha?');
+
 const editData = ref(false);
-const editPassword = ref(false);
-const newPassword = ref('');
-const confirmPassword = ref('');
 const userStore = useUserStore();
 const user = userStore.user;
 const company = ref(userStore.company);
@@ -17,22 +14,11 @@ const submit = async () => {
 }
 const reset = () => {
   editData.value = false
-  editPassword.value = false
-  newPassword.value = ''
-  confirmPassword.value = ''
 }
 
 const onsubmit = async () => {
   editData.value = !editData.value
 }
-
-watch(editPassword, () => {
-    if (editPassword.value == true) {
-        message.value = 'Alterando Senha';
-    }else{
-        message.value = 'Alterar Senha?';
-    }
-});
 
 async function getCompanies(){
    company.value =  await userStore.getCompany()
@@ -49,18 +35,10 @@ onBeforeMount(() => {
       <div class="tw-my-2 row tw-w-full justify-center lg:tw-w-1/3 lg:tw-mt-5">
         <div class="row justify-center full-width">
           <img
-            class=" tw-max-w-[50px]
-             tw-mb-20
-              sm:tw-max-w-[100px]
-               sm:tw-mb-20
-                lg:tw-max-w-[120px]
-                 lg:tw-z-10
-                  lg:tw-fixed
-                    lg:tw-mr-[300px]
-                     lg:tw-mb-[150px]"
-             src="public/icons/logo_mae.svg"
+            class=" tw-max-w-[50px] tw-mb-20 sm:tw-max-w-[100px] sm:tw-mb-20 lg:tw-max-w-[120px] lg:tw-z-10 lg:tw-fixed lg:tw-mr-[300px] lg:tw-mb-[150px]"
+            src="public/icons/logo_mae.svg"
           >
-          <img class="tw-w-[120px] tw-mr-12 sm:tw-w-[150px] md:tw-w-[200px] sm:tw-mr-28 lg:tw-mr-0 " alt="regiani-klim" src="public/img/rounded_foto_perfil_Giovana_corrected.png">
+          <img class="tw-w-[120px] tw-mr-12 sm:tw-w-[150px] md:tw-w-[200px] sm:tw-mr-28 lg:tw-mr-0 " alt="regiani-klim" src="public/img/foto_regiani.svg">
         </div>
         <div class="row tw-mt-2 full-width tw-justify-center tw-text-lg tw-font-bold sm:tw-text-2xl lg:tw-text-3xl">
           <span v-if="!editData">{{user.name}}</span>
